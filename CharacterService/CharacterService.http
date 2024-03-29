@@ -1,0 +1,6 @@
+@CharacterService_HostAddress = http://localhost:5264
+
+GET {{CharacterService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
