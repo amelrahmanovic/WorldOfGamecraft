@@ -1,3 +1,7 @@
+using CharacterService;
+using CharacterService.DataAccessObject;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +10,12 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// For Entity Framework
+builder.Services.AddDbContext<AppDbContex>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("MSSQLDBConnection")));
+
+builder.Services.AddScoped<CharacterDAO>();
+builder.Services.AddScoped<ItemDAO>();
 
 var app = builder.Build();
 
