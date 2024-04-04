@@ -1,9 +1,12 @@
 ﻿using CharacterService.DataAccessObject;
-using CharacterService.Models.VM.Character;
 using CharacterService.Models.VM.Item;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using StackExchange.Redis;
+using NRedisStack;
+using NRedisStack.RedisStackCommands;
+using StackExchange.Redis;
 
 namespace CharacterService.Controllers
 {
@@ -12,9 +15,13 @@ namespace CharacterService.Controllers
     public class ItemsController : ControllerBase
     {
         private ItemDAO _itemDAO;
-        public ItemsController(ItemDAO itemDAO)
+        private readonly ILogger<ItemDAO> _logger
+
+        public ItemsController(ItemDAO itemDAO, ILogger<ItemDAO> logger)
         {
             _itemDAO = itemDAO;
+
+            _logger = logger;
         }
 
         [Authorize(Roles = "GameMaster")]
@@ -27,7 +34,41 @@ namespace CharacterService.Controllers
         [HttpGet("{id}")] //add to cache
         public ItemVM getAll(int id)
         {
-            return _itemDAO.GetById(id);
+            try
+            {
+                #region caching
+                ConnectionMultiplexer redis;
+                ItemVM itemVM;
+                try//try to connect from local machine
+                {
+                    redis = ConnectionMultiplexer.Connect("localhost,connectTimeout=10000,responseTimeout=10000");
+                }
+                catch (Exception)//connect to docker
+                {
+                    redis = ConnectionMultiplexer.Connect("redis:6379,connectTimeout=10000,responseTimeout=10000");
+                }
+
+                IDatabase db = redis.GetDatabase();
+
+                var cache = db.StringGet(id.ToString());
+                if (cache.HasValue)
+                {
+                    itemVM = JsonConvert.DeserializeObject<ItemVM>(cache);
+                }
+                else
+                {
+                    itemVM = _itemDAO.GetById(id);
+                    string jsonString = JsonConvert.SerializeObject(itemVM);
+                    db.StringSet(id.ToString(), jsonString);
+                }
+                #endregion
+                return itemVM;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return new ItemVM() {Description="", Name="" };
+            }
         }
         [Authorize(Roles = "User")]
         [HttpPost]

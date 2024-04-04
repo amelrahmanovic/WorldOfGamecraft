@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+  accountservice:
+    image: ${DOCKER_REGISTRY-}accountservice
+    build:
+      context: .
+      dockerfile: AccountService/Dockerfile
+
+  characterservice:
+    image: ${DOCKER_REGISTRY-}characterservice
+    build:
+      context: .
+      dockerfile: CharacterService/Dockerfile
+

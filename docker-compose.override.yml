@@ -1,0 +1,22 @@
+version: '3.4'
+
+services:
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  accountservice:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8082
+    ports:
+      - "8082"
+
+  characterservice:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8081
+    ports:
+      - "8081"
