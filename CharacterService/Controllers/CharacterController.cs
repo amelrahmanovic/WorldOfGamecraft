@@ -14,13 +14,13 @@ namespace CharacterService.Controllers
         {
             _characterDAO = characterDAO;
         }
-        //Authorization
+        [Authorize(Roles = "GameMaster")]
         [HttpGet]
         public IEnumerable<CharacterVM> getAll() //Only accessible to Game Masters.
         {
             return _characterDAO.GetAll();
         }
-        //Authorization
+        [Authorize(Roles = "GameMaster,User")]
         [HttpGet("{id}")] //add to cache
         public CharacterAllVM getAll(int id)
         {
