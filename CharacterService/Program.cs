@@ -1,8 +1,9 @@
-using CharacterService;
+﻿using CharacterService;
 using CharacterService.DataAccessObject;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,7 +49,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+// Configure Serilog
+builder.Host.UseSerilog((ctx, lc) => lc
+
+    .WriteTo.Console()
+
+    .WriteTo.File("logs/CharacterService.txt", rollingInterval: RollingInterval.Day)
+
+    .ReadFrom.Configuration(ctx.Configuration));
+
 var app = builder.Build();
+
+//Add support to logging request with SERILOG
+app.UseSerilogRequestLogging();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
