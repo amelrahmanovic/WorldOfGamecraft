@@ -10,9 +10,6 @@ services:
      - SA_PASSWORD=Password_01
     ports:
      - "1433:1433"
-    volumes:
-      - mssql-data:/var/opt/mssql
-
 
   redis:
     image: redis:latest
@@ -20,6 +17,7 @@ services:
       - "6379:6379"
 
   accountservice:
+    container_name: AccountService
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8082
@@ -27,6 +25,7 @@ services:
       - "8082"
 
   characterservice:
+    container_name: CharacterService
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8081
