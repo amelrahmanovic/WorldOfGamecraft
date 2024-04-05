@@ -87,6 +87,7 @@ namespace AccountService.Controllers
                 }
 
                 authClaims.Add(new Claim("FullName", user.FirstName + " " + user.LastName));
+                authClaims.Add(new Claim("Id", user.Id));
 
                 var token = CreateToken(authClaims);
                 var refreshToken = GenerateRefreshToken();

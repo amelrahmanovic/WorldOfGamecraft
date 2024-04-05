@@ -2,6 +2,7 @@
 using CharacterService.Models.VM.Character;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CharacterService.Controllers
 {
@@ -26,12 +27,22 @@ namespace CharacterService.Controllers
         {
             return _characterDAO.GetById(id);
         }
-        [AllowAnonymous]
+        [Authorize(Roles = "User")]
         [HttpPost]
         public IActionResult Add(CharacterNewVM characterNewVM)
         {
-            _characterDAO.Save(characterNewVM);
-            return Created();
+            var userClaims = User.Claims;
+            var userIdClaim = userClaims.FirstOrDefault(c => c.Type == "Id");
+            if (userIdClaim != null)
+            {
+                characterNewVM.CreatedBy = userIdClaim.Value;
+                _characterDAO.Save(characterNewVM);
+                return Created();
+            }
+            else
+            {
+                return BadRequest("Id user not found.");
+            }
         }
     }
 }
