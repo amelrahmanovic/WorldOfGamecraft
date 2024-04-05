@@ -15,7 +15,7 @@ namespace CharacterService.Controllers
     public class ItemsController : ControllerBase
     {
         private ItemDAO _itemDAO;
-        private readonly ILogger<ItemDAO> _logger
+        private readonly ILogger<ItemDAO> _logger;
 
         public ItemsController(ItemDAO itemDAO, ILogger<ItemDAO> logger)
         {

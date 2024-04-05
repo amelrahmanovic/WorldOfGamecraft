@@ -2,6 +2,18 @@ version: '3.4'
 
 services:
 
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server
+    container_name: MsSqlServer
+    environment:
+     - ACCEPT_EULA=Y
+     - SA_PASSWORD=Password_01
+    ports:
+     - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+
+
   redis:
     image: redis:latest
     ports:
