@@ -5,7 +5,8 @@
       "commandVersion": "1.0",
       "serviceActions": {
         "characterservice": "StartDebugging",
-        "accountservice": "StartDebugging"
+        "accountservice": "StartDebugging",
+        "combatservice": "StartDebugging"
       }
     }
   }

@@ -1,6 +1,15 @@
 version: '3.4'
 
 services:
+  rabbitmq:
+    container_name: RabbitMQ
+    image: rabbitmq:management # Koristimo RabbitMQ Docker sliku s uključenim upravljačkim sučeljem
+    ports:
+    - "5672:5672" # RabbitMQ working port
+    - "15672:15672" # RabbitMQ control
+    environment:
+        RABBITMQ_DEFAULT_USER: rabbitmq
+        RABBITMQ_DEFAULT_PASS: rabbitmq
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server
@@ -32,3 +41,13 @@ services:
       - ASPNETCORE_HTTP_PORTS=8081
     ports:
       - "8081"
+
+
+  combatservice:
+    container_name: CombatService
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8083
+    ports:
+      - "8083"
+

@@ -1,9 +1,13 @@
 ﻿using AccountService.Models;
 using AccountService.Models.VM;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using RabbitMQ.Client;
+using SharingModels;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -18,12 +22,17 @@ namespace AccountService.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
+        private MapperConfiguration config;
+        private Mapper mapper;
 
         public AuthenticateController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
+
+            config = new MapperConfiguration(cfg => cfg.AddProfile<MappingProfile>());
+            mapper = new Mapper(config);
         }
 
         [AllowAnonymous]
@@ -57,6 +66,51 @@ namespace AccountService.Controllers
             if (model.UserRole != null)
                 if (await _roleManager.RoleExistsAsync(model.UserRole))
                     await _userManager.AddToRoleAsync(user, model.UserRole);
+
+            #region RabbitMQ
+            try
+            {
+                var factory = new ConnectionFactory()
+                {
+                    HostName = "localhost", // Docker host
+                    UserName = "rabbitmq", // RabbitMQ username
+                    Password = "rabbitmq" // RabbitMQ password
+                };
+
+                IConnection connection;
+                try//try to connect from local machine
+                {
+                    factory.HostName = "localhost";
+                    connection = factory.CreateConnection();
+                }
+                catch (Exception)//connect to docker
+                {
+                    factory.HostName = "rabbitmq";
+                    connection = factory.CreateConnection();
+                }
+
+                var channel = connection.CreateModel();
+                channel.QueueDelete(queue: "users");
+                channel.QueueDeclare(queue: "users",
+                                         durable: false,
+                                         exclusive: false,
+                                         autoDelete: false,
+                                         arguments: null);
+
+                List<ApplicationUser> users = _userManager.Users.ToList();
+                List<ApplicationUserVM> applicationUserVM = mapper.Map<List<ApplicationUserVM>>(users);
+                var json = JsonConvert.SerializeObject(applicationUserVM);
+                var body = Encoding.UTF8.GetBytes(json);
+
+                channel.BasicPublish(exchange: "",
+                                     routingKey: "users",
+                                     basicProperties: null,
+                                     body: body);
+            }
+            catch (Exception)
+            {
+            }
+            #endregion
 
             return Created();
         }
