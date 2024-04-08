@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
+using RabbitMQHelper;
 using SharingModels;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -68,47 +69,23 @@ namespace AccountService.Controllers
                     await _userManager.AddToRoleAsync(user, model.UserRole);
 
             #region RabbitMQ
-            try
+            RabbitMQCRUD rabbitMQCRUD = new RabbitMQCRUD("localhost", "rabbitmq", "rabbitmq");
+            var existQueue = rabbitMQCRUD.ExistQueue("users");
+            if (!existQueue)
             {
-                var factory = new ConnectionFactory()
-                {
-                    HostName = "localhost", // Docker host
-                    UserName = "rabbitmq", // RabbitMQ username
-                    Password = "rabbitmq" // RabbitMQ password
-                };
-
-                IConnection connection;
-                try//try to connect from local machine
-                {
-                    factory.HostName = "localhost";
-                    connection = factory.CreateConnection();
-                }
-                catch (Exception)//connect to docker
-                {
-                    factory.HostName = "rabbitmq";
-                    connection = factory.CreateConnection();
-                }
-
-                var channel = connection.CreateModel();
-                channel.QueueDelete(queue: "users");
-                channel.QueueDeclare(queue: "users",
-                                         durable: false,
-                                         exclusive: false,
-                                         autoDelete: false,
-                                         arguments: null);
-
                 List<ApplicationUser> users = _userManager.Users.ToList();
                 List<ApplicationUserVM> applicationUserVM = mapper.Map<List<ApplicationUserVM>>(users);
                 var json = JsonConvert.SerializeObject(applicationUserVM);
-                var body = Encoding.UTF8.GetBytes(json);
 
-                channel.BasicPublish(exchange: "",
-                                     routingKey: "users",
-                                     basicProperties: null,
-                                     body: body);
+                rabbitMQCRUD.NewQueues("users", json);
             }
-            catch (Exception)
+            else
             {
+                List<ApplicationUser> users = new List<ApplicationUser> { user };
+                List<ApplicationUserVM> applicationUserVM = mapper.Map<List<ApplicationUserVM>>(users);
+                var json = JsonConvert.SerializeObject(applicationUserVM);
+
+                rabbitMQCRUD.NewQueues("users", json);
             }
             #endregion
 

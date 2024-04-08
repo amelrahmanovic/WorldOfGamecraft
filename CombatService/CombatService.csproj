@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RabbitMQHelper\RabbitMQHelper.csproj" />
     <ProjectReference Include="..\SharingModels\SharingModels.csproj" />
   </ItemGroup>
 

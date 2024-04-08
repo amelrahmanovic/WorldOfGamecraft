@@ -13,6 +13,8 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharingModels", "SharingModels\SharingModels.csproj", "{36E4EC76-16A5-4E79-B541-CD3A5BCED5EB}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbitMQHelper", "RabbitMQHelper\RabbitMQHelper.csproj", "{2D6F73F4-C352-4687-AEB7-F8B0721BEC2A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{36E4EC76-16A5-4E79-B541-CD3A5BCED5EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36E4EC76-16A5-4E79-B541-CD3A5BCED5EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36E4EC76-16A5-4E79-B541-CD3A5BCED5EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D6F73F4-C352-4687-AEB7-F8B0721BEC2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D6F73F4-C352-4687-AEB7-F8B0721BEC2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D6F73F4-C352-4687-AEB7-F8B0721BEC2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D6F73F4-C352-4687-AEB7-F8B0721BEC2A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
