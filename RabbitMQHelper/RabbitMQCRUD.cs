@@ -15,6 +15,7 @@ namespace RabbitMQHelper
             this.HostName = HostName;
             this.UserName = UserName;
             this.Password = Password;
+            //OpenConnection();
         }
 
         private void OpenConnection()
@@ -85,37 +86,41 @@ namespace RabbitMQHelper
         }
         public string GetQueues(string nameQueue, bool autoAck, bool AckMessage)
         {
-            OpenConnection();
             string message = "";
-            using (var channel = connection.CreateModel())
+            try
             {
-                channel.QueueDeclare(queue: "users",
-                                     durable: false,
-                                     exclusive: false,
-                                     autoDelete: false,
-                                     arguments: null);
-
-                // Create a consumer
-                var consumer = new EventingBasicConsumer(channel);
-                consumer.Received += (model, ea) =>
+                OpenConnection();
+                using (var channel = connection.CreateModel())
                 {
-                    var body = ea.Body;
-                    message = Encoding.UTF8.GetString(body.ToArray());
-                    try
+                    channel.QueueDeclare(queue: "users",
+                                         durable: false,
+                                         exclusive: false,
+                                         autoDelete: false,
+                                         arguments: null);
+
+                    // Create a consumer
+                    var consumer = new EventingBasicConsumer(channel);
+                    consumer.Received += (model, ea) =>
                     {
-                        if (AckMessage)
-                            channel.BasicAck(ea.DeliveryTag, false);
+                        var body = ea.Body;
+                        message = Encoding.UTF8.GetString(body.ToArray());
+                        try
+                        {
+                            if (AckMessage)
+                                channel.BasicAck(ea.DeliveryTag, false);
 
-                    }
-                    catch (Exception) { }
-                };
+                        }
+                        catch (Exception) { }
+                    };
 
-                // Start consuming messages
-                string consumerTag = channel.BasicConsume(queue: nameQueue,
-                                     autoAck: autoAck,
-                                     consumer: consumer);
+                    // Start consuming messages
+                    string consumerTag = channel.BasicConsume(queue: nameQueue,
+                                         autoAck: autoAck,
+                                         consumer: consumer);
+                }
+                connection.Close();
             }
-            connection.Close();
+            catch (Exception) { }
             return message;
         }
         public bool ExistQueue(string nameQueue)

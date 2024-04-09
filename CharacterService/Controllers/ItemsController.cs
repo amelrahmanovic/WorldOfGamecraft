@@ -58,8 +58,7 @@ namespace CharacterService.Controllers
                 else
                 {
                     itemVM = _itemDAO.GetById(id);
-                    string jsonString = JsonConvert.SerializeObject(itemVM);
-                    db.StringSet(id.ToString(), jsonString);
+                    db.StringSet(id.ToString(), JsonConvert.SerializeObject(itemVM));
                 }
                 #endregion
                 return itemVM;
