@@ -3,10 +3,7 @@ using CharacterService.Models.VM.Item;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using StackExchange.Redis;
-using NRedisStack;
-using NRedisStack.RedisStackCommands;
-using StackExchange.Redis;
+using RedisHelper;
 
 namespace CharacterService.Controllers
 {
@@ -37,28 +34,18 @@ namespace CharacterService.Controllers
             try
             {
                 #region caching
-                ConnectionMultiplexer redis;
+                string connectionString = "localhost";
+                RedisCRUD redisCRUD = new RedisCRUD(connectionString);
+                string result = redisCRUD.Get("Item-" + id.ToString());
                 ItemVM itemVM;
-                try//try to connect from local machine
+                if (result!="")
                 {
-                    redis = ConnectionMultiplexer.Connect("localhost,connectTimeout=10000,responseTimeout=10000");
-                }
-                catch (Exception)//connect to docker
-                {
-                    redis = ConnectionMultiplexer.Connect("redis:6379,connectTimeout=10000,responseTimeout=10000");
-                }
-
-                IDatabase db = redis.GetDatabase();
-
-                var cache = db.StringGet(id.ToString());
-                if (cache.HasValue)
-                {
-                    itemVM = JsonConvert.DeserializeObject<ItemVM>(cache);
+                    itemVM = JsonConvert.DeserializeObject<ItemVM>(result);
                 }
                 else
                 {
                     itemVM = _itemDAO.GetById(id);
-                    db.StringSet(id.ToString(), JsonConvert.SerializeObject(itemVM));
+                    redisCRUD.Save("Item-" + id.ToString(), JsonConvert.SerializeObject(itemVM));
                 }
                 #endregion
                 return itemVM;

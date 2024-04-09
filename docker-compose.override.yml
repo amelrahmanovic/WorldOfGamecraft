@@ -23,7 +23,7 @@ services:
      - ACCEPT_EULA=Y
      - SA_PASSWORD=Password_01
     ports:
-     - "1433:1433"
+     - "1433:1434"
     healthcheck:
       test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "Password_01" -Q "SELECT 1" -b -o /dev/null
       interval: 30s

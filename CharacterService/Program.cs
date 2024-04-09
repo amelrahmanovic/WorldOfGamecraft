@@ -1,4 +1,5 @@
 ﻿using CharacterService;
+using CharacterService.BacgroundServices;
 using CharacterService.DataAccessObject;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
 
 // Add services to the container.
+
+#region Bacground services
+builder.Services.AddHostedService<ItemsService>();
+#endregion
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

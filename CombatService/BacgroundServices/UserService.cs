@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
 using CombatService.DataAccessObject;
-using CombatService.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using RabbitMQHelper;
 using SharingModels.ModelsVM;
