@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CharacterService
 {
-    public class AppDbContex :DbContext
+    public class AppDbContex : DbContext
     {
         public AppDbContex(DbContextOptions options) : base(options)
         {

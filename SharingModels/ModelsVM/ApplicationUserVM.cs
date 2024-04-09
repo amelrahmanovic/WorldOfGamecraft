@@ -1,4 +1,4 @@
-﻿namespace SharingModels
+﻿namespace SharingModels.ModelsVM
 {
     public class ApplicationUserVM
     {

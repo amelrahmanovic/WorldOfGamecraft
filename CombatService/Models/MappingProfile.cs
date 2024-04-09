@@ -1,13 +1,13 @@
 ﻿using AutoMapper;
 using SharingModels.ModelsVM;
 
-namespace AccountService.Models
+namespace CombatService.Models
 {
     public class MappingProfile : Profile
     {
-        public MappingProfile()
+        public MappingProfile() 
         {
-            CreateMap<ApplicationUser, ApplicationUserVM>();
+            CreateMap<ApplicationUserVM, ApplicationUser>();
         }
     }
 }

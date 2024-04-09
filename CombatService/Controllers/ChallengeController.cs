@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQHelper;
-using SharingModels;
+using SharingModels.ModelsVM;
 using System.Text;
 
 namespace CombatService.Controllers
@@ -23,7 +23,7 @@ namespace CombatService.Controllers
         {
             #region RabbitMQ
             RabbitMQCRUD rabbitMQCRUD = new RabbitMQCRUD("localhost", "rabbitmq", "rabbitmq");
-            var message = rabbitMQCRUD.GetQueues("users", false);
+            var message = rabbitMQCRUD.GetQueues("users", false, true);
             applicationUsers = JsonConvert.DeserializeObject<List<ApplicationUserVM>>(message);
             #endregion
 

@@ -1,7 +1,6 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
-using System.Threading.Channels;
 
 namespace RabbitMQHelper
 {
@@ -22,22 +21,26 @@ namespace RabbitMQHelper
 
         private void OpenConnection()
         {
-            factory = new ConnectionFactory()
+            try
             {
-                //HostName = HostName, // Docker host
-                UserName = UserName, // RabbitMQ username
-                Password = Password // RabbitMQ password
-            };
-            try//try to connect from local machine
-            {
-                factory.HostName = HostName;
-                connection = factory.CreateConnection();
+                factory = new ConnectionFactory()
+                {
+                    //HostName = HostName, // Docker host
+                    UserName = UserName, // RabbitMQ username
+                    Password = Password // RabbitMQ password
+                };
+                try//try to connect from local machine
+                {
+                    factory.HostName = HostName;
+                    connection = factory.CreateConnection();
+                }
+                catch (Exception)//connect to docker
+                {
+                    factory.HostName = "rabbitmq";
+                    connection = factory.CreateConnection();
+                }
             }
-            catch (Exception)//connect to docker
-            {
-                factory.HostName = "rabbitmq";
-                connection = factory.CreateConnection();
-            }
+            catch (Exception){}
         }
 
         public void NewQueues(string nameQueue, string json)
@@ -86,7 +89,7 @@ namespace RabbitMQHelper
             }
             connection.Close();
         }
-        public string GetQueues(string nameQueue, bool autoAck)
+        public string GetQueues(string nameQueue, bool autoAck, bool AckMessage)
         {
             OpenConnection();
             string message = "";
@@ -106,7 +109,9 @@ namespace RabbitMQHelper
                     message = Encoding.UTF8.GetString(body.ToArray());
                     try
                     {
-                        channel.BasicAck(ea.DeliveryTag, false);
+                        if (AckMessage)
+                            channel.BasicAck(ea.DeliveryTag, false);
+
                     }
                     catch (Exception) { }
                 };
@@ -121,20 +126,27 @@ namespace RabbitMQHelper
         }
         public bool ExistQueue(string nameQueue)
         {
-            OpenConnection();
-            using (var channel = connection.CreateModel())
+            try
             {
-                try
+                OpenConnection();
+                using (var channel = connection.CreateModel())
                 {
-                    channel.QueueDeclarePassive(nameQueue);
-                    connection.Close();
-                    return true;
+                    try
+                    {
+                        channel.QueueDeclarePassive(nameQueue);
+                        connection.Close();
+                        return true;
+                    }
+                    catch (RabbitMQ.Client.Exceptions.OperationInterruptedException)
+                    {
+                        connection.Close();
+                        return false;
+                    }
                 }
-                catch (RabbitMQ.Client.Exceptions.OperationInterruptedException)
-                {
-                    connection.Close();
-                    return false;
-                }
+            }
+            catch (Exception)
+            {
+                return false;
             }
 
         }
