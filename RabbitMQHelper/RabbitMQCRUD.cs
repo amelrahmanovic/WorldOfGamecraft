@@ -8,7 +8,6 @@ namespace RabbitMQHelper
     {
         private ConnectionFactory factory;
         private IConnection connection;
-        private bool success = true;
         private string HostName, UserName, Password;
 
         public RabbitMQCRUD(string HostName, string UserName, string Password)
@@ -16,31 +15,26 @@ namespace RabbitMQHelper
             this.HostName = HostName;
             this.UserName = UserName;
             this.Password = Password;
-            //OpenConnection();
         }
 
         private void OpenConnection()
         {
-            try
+            factory = new ConnectionFactory()
             {
-                factory = new ConnectionFactory()
-                {
-                    //HostName = HostName, // Docker host
-                    UserName = UserName, // RabbitMQ username
-                    Password = Password // RabbitMQ password
-                };
-                try//try to connect from local machine
-                {
-                    factory.HostName = HostName;
-                    connection = factory.CreateConnection();
-                }
-                catch (Exception)//connect to docker
-                {
-                    factory.HostName = "rabbitmq";
-                    connection = factory.CreateConnection();
-                }
+                //HostName = HostName, // Docker host
+                UserName = UserName, // RabbitMQ username
+                Password = Password // RabbitMQ password
+            };
+            try//try to connect from local machine
+            {
+                factory.HostName = HostName;
+                connection = factory.CreateConnection();
             }
-            catch (Exception){}
+            catch (Exception)//connect to docker
+            {
+                factory.HostName = "rabbitmq";
+                connection = factory.CreateConnection();
+            }
         }
 
         public void NewQueues(string nameQueue, string json)
@@ -126,27 +120,20 @@ namespace RabbitMQHelper
         }
         public bool ExistQueue(string nameQueue)
         {
-            try
+            OpenConnection();
+            using (var channel = connection.CreateModel())
             {
-                OpenConnection();
-                using (var channel = connection.CreateModel())
+                try
                 {
-                    try
-                    {
-                        channel.QueueDeclarePassive(nameQueue);
-                        connection.Close();
-                        return true;
-                    }
-                    catch (RabbitMQ.Client.Exceptions.OperationInterruptedException)
-                    {
-                        connection.Close();
-                        return false;
-                    }
+                    channel.QueueDeclarePassive(nameQueue);
+                    connection.Close();
+                    return true;
                 }
-            }
-            catch (Exception)
-            {
-                return false;
+                catch (RabbitMQ.Client.Exceptions.OperationInterruptedException)
+                {
+                    connection.Close();
+                    return false;
+                }
             }
 
         }
