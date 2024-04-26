@@ -1,71 +1,17 @@
 version: '3.4'
 
 services:
-  rabbitmq:
-    container_name: RabbitMQ
-    image: rabbitmq:management # Koristimo RabbitMQ Docker sliku s uključenim upravljačkim sučeljem
-    ports:
-    - "5672:5672" # RabbitMQ working port
-    - "15672:15672" # RabbitMQ control
-    environment:
-        RABBITMQ_DEFAULT_USER: rabbitmq
-        RABBITMQ_DEFAULT_PASS: rabbitmq
-    healthcheck:
-        test: ["CMD", "rabbitmqctl", "status"]
-        interval: 30s
-        retries: 5
-        start_period: 60s
-
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server
-    container_name: MsSqlServer
-    environment:
-     - ACCEPT_EULA=Y
-     - SA_PASSWORD=Password_01
-    ports:
-     - "1433:1434"
-    healthcheck:
-      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "Password_01" -Q "SELECT 1" -b -o /dev/null
-      interval: 30s
-      retries: 5
-      start_period: 60s
-
-  redis:
-    container_name: Redis
-    image: redis:latest
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      retries: 5
-      start_period: 60s
-
   accountservice:
     container_name: AccountService
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=8082
-    ports:
-      - "8082:8082"
-    depends_on:
-      sqlserver:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - ASPNETCORE_HTTP_PORTS=8082  
 
   characterservice:
     container_name: CharacterService
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8081
-    ports:
-      - "8081:8081"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
 
 
   combatservice:
@@ -73,11 +19,4 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8083
-    ports:
-      - "8083:8083"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      sqlserver:
-        condition: service_healthy
-
+    
